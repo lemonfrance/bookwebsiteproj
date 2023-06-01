@@ -1,0 +1,64 @@
+{% extends 'layout.html' %} {% block content %}
+<main id="main">
+    <h1>Welcome to litCrave!</h1>
+    <br>
+    <p>The place that will satisfy your reading palate through our vast variety of delectable comic books. Book appetit!</p>
+    <br>
+    <div class="content-compartment">
+        <h3>Our latest flavours!</h3>
+        <br>
+        {%for book in five_latest_books%}
+        <article>
+        <div class="book_preview">
+            <a href="{{book.view_info_url}}" target="_blank">
+                <img class="book_info_img" src={{book.image_hyperlink}} alt="book cover image">
+            </a>
+            <h3 style="color:white;">{{book.title|truncate(15,True,'...')}}</h3>
+            <sub style="color:white;">
+            {% set names = [] %}
+            {% for a in book.authors %}
+                {{ names.append(a.full_name) or ''}}
+            {% endfor %}
+            {{ names|join(', ') | truncate(10,True,'...') }}
+            </sub>
+        </div>
+        </article>
+        {% endfor %}
+    </div>
+    <br>
+
+    <div class="content-compartment">
+        <h3>Critically acclaimed books to check out!</h3>
+        <br>
+        {% for book in five_top_books %}
+        <article>
+        <div class="book_preview">
+            <a href="{{book.view_info_url}}" target="_blank">
+                <img class="book_info_img" src={{book.image_hyperlink}} alt="book cover image">
+            </a>
+            <h3 style="color:white;">{{book.title|truncate(15,True,'...')}}</h3>
+            <sub style="color:white;">
+            {% set names = [] %}
+            {% for a in book.authors %}
+                {{ names.append(a.full_name) or ''}}
+            {% endfor %}
+            {{ names|join(', ') | truncate(10,True,'...') }}
+            </sub>
+        </div>
+        </article>
+        {% endfor %}
+    </div>
+    <br>
+
+    <div class="content-compartment">
+        <h3>Seasoned, talented authors to check out!</h3>
+        <br>
+        <ol type="1">
+        {%for author in five_top_authors%}
+            <li>{{author.full_name}}</li>
+            {% endfor %}
+        </ol>
+    </div>
+
+</main>
+{% endblock %}

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>litCrave - {{ title }}</title>
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/main.css') }}"
+    />
+
+</head>
+
+<body>
+    <div id="fixed-header">
+    {% include 'header.html' %}
+    {% include 'navigation.html' %}
+    </div>
+    <div id="body">
+
+        <div id="content-box">
+            {% block content %} {% endblock %}
+        </div>
+
+    </div>
+    {% include 'footer.html' %}
+</body>
+</html>

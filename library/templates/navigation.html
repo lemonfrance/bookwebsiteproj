@@ -1,0 +1,12 @@
+<div id="nav">
+    <p> <a style="float:left;display: inline;" href="{{url_for('home_bp.home')}}">Home </a>
+        <div class="nav-text">&nbsp| Books |&nbsp<br>
+        <div class="nav-dropdown">
+            <a class="link_text" href="{{url_for('books_bp.display_all_books')}}">All Books</a>
+            <br>
+            <a class="link_text" href="{{url_for('books_bp.display_by_shelves')}}">By Shelves</a>
+        </div>
+        </div>
+        <a style="float:left; display: inline;" href="{{url_for('authors_bp.all_authors')}}"> Authors</a>
+    </p>
+</div>

@@ -1,0 +1,50 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+
+<main id="main">
+    <header>
+        <form>
+            Find Shelf:
+          <input list="shelves">
+          <datalist id="shelves">
+              {% for shelf in all_shelves %}
+              <option value={shelf.name}>
+              {% endfor %}
+          </datalist>
+            <input type="submit" value="Display">
+        </form>
+        <div>
+            Some shelves you can visit:
+            {% for shelf_name in random_20_shelf_names %}
+            <button id="shelf_btns" class="working_btn" onclick="location.href='{{ shelf_urls[shelf_name] }}'">{{ shelf_name }}</button>
+            {% endfor %}
+        </div>
+    </header>
+    <br>
+    <h2> Check out our books from the hottest shelves! </h2>
+    {% for shelf in shelves %}
+    <article>
+    <div class="content-compartment">
+        <h2><a href="">{{shelf.name}}</a></h2>
+        {% for book in shelf.shelved_books %}
+            <div class="book_preview" style="float:left">
+                <a href="{{book.hyperlink}}" target="_blank">
+                    <img src={{book.image_hyperlink}} alt="book cover image">
+                </a>
+                <br>
+                <strong>{{book.title}}</strong>
+                <br>
+                {% for a in book.authors %}
+                    {{a.full_name}}
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+    </article>
+    {% endfor %}
+
+    <footer>
+    </footer>
+</main>
+{% endblock %}

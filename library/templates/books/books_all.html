@@ -1,0 +1,70 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+
+<main id="main">
+    <header>
+        <p>
+        <form>
+            Find Book:
+          <input type="text" id="book" list="all_books">
+          <datalist id="all_books">
+              {% for book in all_books %}
+              <option value={{book.title}}>
+              {% endfor %}
+          </datalist>
+            <input type="submit" value="Search">
+        </form>
+        </p>
+        <h2>Our Book Collection</h2>
+    </header>
+
+    {% for book in books %}
+    <article>
+        <div class="book_preview">
+            <a href="{{book.view_info_url}}" target="_blank">
+                <img class="book_info_img" src={{book.image_hyperlink}} alt="book cover image">
+            </a>
+            <h3 style="color:white;">{{book.title|truncate(15,False,'...')}}</h3>
+            <sub style="color:white;">
+            {% set names = [] %}
+            {% for a in book.authors %}
+                {{ names.append(a.full_name) or ''}}
+            {% endfor %}
+            {{ names|join(', ') | truncate(10,True,'...') }}
+            </sub>
+        </div>
+    </article>
+    {% endfor %}
+
+    <footer>
+        <nav style="clear:both">
+            <div style="float:left">
+                {% if first_book_url is not none %}
+                    <button class="working_btn" onclick="location.href='{{first_book_url}}'">First</button>
+                {% else %}
+                    <button class="disabled_btn" disabled>First</button>
+                {% endif %}
+                {% if prev_book_url is not none %}
+                    <button class="working_btn" onclick="location.href='{{prev_book_url}}'">Previous</button>
+                {% else %}
+                    <button class="disabled_btn" disabled>Previous</button>
+                {% endif %}
+            </div>
+            <div style="float:right">
+                {% if next_book_url is not none %}
+                    <button class="working_btn" onclick="location.href='{{next_book_url}}'">Next</button>
+                {% else %}
+                    <button class="disabled_btn" disabled>Next</button>
+                {% endif %}
+                {% if last_book_url is not none %}
+                    <button class="working_btn"  onclick="location.href='{{last_book_url}}'">Last</button>
+                {% else %}
+                    <button class="disabled_btn" disabled>Last</button>
+                {% endif %}
+            </div>
+        </nav>
+    </footer>
+</main>
+
+{% endblock %}

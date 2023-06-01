@@ -1,0 +1,62 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+
+<main id="main">
+        <article style="width:20%;">
+            <div class="book_preview" style="display:block;height=100%;width:100%;">
+        <a href="{{book.hyperlink}}" target="_blank">
+            <img class="book_info_img" style="height=100%;width:100%;" src={{book.image_hyperlink}} alt="book cover image">
+        </a>
+            <p>
+            <button>Read Book</button>
+            </p>
+            </div>
+        </article>
+
+        <article style="background:white;width:70%;">
+        <div style="display:inline-block;position:static;">
+        <p>
+        <strong style="font-size:150%">{{book.title}}</strong>
+        <br>Written by:
+            {% for a in book.authors %}
+                {{a.full_name}}
+            {% endfor %}
+        <br>
+            {% if book.publisher is not none %}
+                Published by {{book.publisher}}
+            {% endif %}
+            {% if book.release_year is not none %}
+                ({{book.release_year}})
+            {% endif %}
+        </p>
+
+        <p>{{book.description}}</p>
+        <div style="float:left, padding: 5px;">
+            {% for shelf in book.shelves %}
+            <button class="shelf_btns" onclick="location.href='{{ shelf_urls[shelf.name] }}'">{{ shelf.name }}</button> &nbsp
+            {% endfor %}
+        </div>
+        </div>
+
+        <br>
+
+        <div style="position:static;display:block;">
+            {% if book.reviews|length > 0 and book.id != show_reviews_for_book %}
+                <button class="working_btn" onclick="location.href='{{ book.view_review_url }}'">{{ book.reviews|length }} reviews</button>
+            {% endif %}
+            <button class="working_btn" onclick="location.href='{{ book.write_review_url }}'">Write Review</button>
+        </div>
+
+        {% if book.book_id == show_reviews_for_book %}
+        <div style="clear:both">
+            {% for review in book.reviews %}
+                <p>{{review.review_text}}
+                <br><strong> by {{review.user_name}}, {{review.timestamp}} </strong>
+                </p>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </article>
+</main>
+{% endblock %}
