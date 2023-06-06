@@ -1,3 +1,4 @@
+import csv
 from pathlib import Path
 from datetime import date, datetime
 from typing import List, Dict
@@ -8,7 +9,7 @@ from werkzeug.security import generate_password_hash
 
 from library.adapters.repository import AbstractRepository, RepositoryException
 from library.domain.model import Book, Author, Publisher, Review, User, Shelf, make_review
-from library.adapters.jsondatareader import BooksJSONReader, AuthorsJSONReader, UsersJSONReader, ReviewsJSONReader
+from library.adapters.jsondatareader import BooksJSONReader, AuthorsJSONReader
 
 repo_instance = None
 
@@ -116,39 +117,30 @@ class MemoryRepository(AbstractRepository):
         return [r for r in self.__book_reviews if book.book_id == r.book.book_id]
 
     def get_user_reviews(self, user: User) -> List[Review]:
-        return [u for u in self.__book_reviews if user.user_name == u.user.user_name]
+        return [u for u in self.__book_reviews if user.user_id == u.user.user_id]
 
     # User methods
     def add_user(self, user: User):
         self.__users.append(user)
 
-    def get_user(self, user_name) -> User:
-        return next((user for user in self.__users if user.user_name == user_name), None)
+    def get_user_by_id(self, user_id) -> User:
+        return next((user for user in self.__users if user.user_id == user_id), None)
 
 
+# For JSON files (for books and authors)
 def read_json_files(data_path: Path, data_type):
-    users_filename = str(data_path / "user_data_excerpt.json")
     books_filename = str(data_path / "comic_books_excerpt.json")
     authors_filename = str(data_path / "book_authors_excerpt.json")
-    reviews_filename = str(data_path / "book_reviews_excerpt.json")
     datatype = data_type
 
     if datatype is Book:
-        reader = BooksJSONReader(users_filename, books_filename, authors_filename, reviews_filename)
+        reader = BooksJSONReader(books_filename, authors_filename)
         reader.read_json_files()
         return reader.dataset_of_books
-    elif datatype is Author:
-        reader = AuthorsJSONReader(users_filename, books_filename, authors_filename, reviews_filename)
+    else:  # Author
+        reader = AuthorsJSONReader(books_filename, authors_filename)
         reader.read_json_files()
         return reader.dataset_of_authors
-    elif datatype is Review:
-        reader = ReviewsJSONReader(users_filename, books_filename, authors_filename, reviews_filename)
-        reader.read_json_files()
-        return reader.dataset_of_reviews
-    else:  # user
-        reader = UsersJSONReader(users_filename, books_filename, authors_filename, reviews_filename)
-        reader.read_json_files()
-        return reader.dataset_of_users
 
 
 def load_book_info(data_path: Path, repo: MemoryRepository):
@@ -165,18 +157,45 @@ def load_author_info(data_path: Path, repo: MemoryRepository):
         repo.add_author(author_object)
 
 
+# For CSV files (for users and reviews)
+def read_csv_files(filename: str):
+    with open(filename, encoding='utf-8-sig') as f:
+        data = csv.reader(f)
+        next(data)
+        for row in data:
+            row = [d.strip() for d in row]
+            yield row
+
+
 def load_users(data_path: Path, repo: MemoryRepository):
-    user_dataset: List[User] = read_json_files(data_path, User)
-    for user_object in user_dataset:
-        # Add the User to the repository.
+    user_dataset = dict()
+
+    users_filepath = str(Path(data_path) / "users.csv")
+    for u in read_csv_files(users_filepath):
+        user_object = User(
+            user_id=int(u[0]),
+            user_name=u[1],
+            password=generate_password_hash(u[2])
+        )
         repo.add_user(user_object)
+        user_dataset[int(u[0])] = user_object
+    return user_dataset
 
 
 def load_reviews(data_path: Path, repo: MemoryRepository):
-    review_dataset: List[Review] = read_json_files(data_path, Review)
-    for review_object in review_dataset:
-        # Add the Review to the repository.
+    review_dataset = dict()
+
+    reviews_fpath = str(Path(data_path) / "user_reviews.csv")
+    for r in read_csv_files(reviews_fpath):
+        review_object = Review(
+            user=repo.get_user_by_id(int(r[1])),
+            book=repo.get_book_by_id(int(r[2])),
+            review_text=str(r[3]),
+            rating=int(r[4])
+        )
         repo.add_book_review(review_object)
+        review_dataset[int(r[0])] = review_object
+    return review_dataset
 
 
 def populate(data_path: Path, repo: MemoryRepository):
