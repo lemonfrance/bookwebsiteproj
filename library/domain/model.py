@@ -415,6 +415,13 @@ class User:
             # Review objects are in practice always considered different due to their timestamp.
             self.__reviews.append(review)
 
+    def has_reviewed(self, book: Book):
+        r: Review
+        for r in self.__reviews:
+            if r.user == self.__user_id and r.book == book.book_id:
+                return True
+        return False
+
     def __repr__(self):
         return f'<User {self.user_name}>'
 
@@ -473,11 +480,15 @@ class ModelException(Exception):
     pass
 
 
-def make_review(review_text: str, user: User, book: Book, rating: int):
-    r = Review(user, book, review_text, rating)
+def make_review_association(r: Review, user: User, book: Book):
+    # A review connects a book to a user
+    # A book can only be reviewed by a user once
+
+    if user.has_reviewed(book):
+        raise ModelException(f' "{book.title}" has already been reviewed by user {user.user_name}')
+
     user.add_review(r)
     book.add_review(r)
-    return r
 
 
 def make_shelf_association(book: Book, shelf: Shelf):
