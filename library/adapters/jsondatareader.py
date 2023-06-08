@@ -1,23 +1,13 @@
 import json
 from typing import List
 
-from library.domain.model import Publisher, Author, Book, User, Review, Shelf, make_shelf_association
+from library.domain.model import Publisher, Author, Book, Shelf, make_shelf_association
 
 
 class GeneralJSONReader:
-    def __init__(self, users_file_name: str, books_file_name: str, authors_file_name: str, reviews_file_name: str):
-        self.__users_file_name = users_file_name
+    def __init__(self, books_file_name: str, authors_file_name: str):
         self.__books_file_name = books_file_name
         self.__authors_file_name = authors_file_name
-        self.__reviews_file_name = reviews_file_name
-
-    def read_users_file(self) -> list:
-        users_json = []
-        with open(self.__users_file_name, encoding='UTF-8') as users_jsonfile:
-            for line in users_jsonfile:
-                user_entry = json.loads(line)
-                users_json.append(user_entry)
-        return users_json
 
     def read_books_file(self) -> list:
         books_json = []
@@ -35,18 +25,10 @@ class GeneralJSONReader:
                 authors_json.append(author_entry)
         return authors_json
 
-    def read_reviews_file(self) -> list:
-        reviews_json = []
-        with open(self.__reviews_file_name, encoding='UTF-8') as reviews_jsonfile:
-            for line in reviews_jsonfile:
-                review_entry = json.loads(line)
-                reviews_json.append(review_entry)
-        return reviews_json
-
 
 class BooksJSONReader(GeneralJSONReader):
-    def __init__(self, users_file_name: str, books_file_name: str, authors_file_name: str, reviews_file_name: str):
-        super().__init__(users_file_name, books_file_name, authors_file_name, reviews_file_name)
+    def __init__(self, books_file_name: str, authors_file_name: str):
+        super().__init__(books_file_name, authors_file_name)
         self.__dataset_of_books: List[Book] = []
 
     @property
@@ -96,8 +78,8 @@ class BooksJSONReader(GeneralJSONReader):
 
 
 class AuthorsJSONReader(GeneralJSONReader):
-    def __init__(self, users_file_name: str, books_file_name: str, authors_file_name: str, reviews_file_name: str):
-        super().__init__(users_file_name, books_file_name, authors_file_name, reviews_file_name)
+    def __init__(self, books_file_name: str, authors_file_name: str):
+        super().__init__(books_file_name, authors_file_name)
         self.__dataset_of_authors: List[Author] = []
 
     @property
@@ -122,76 +104,3 @@ class AuthorsJSONReader(GeneralJSONReader):
                         if a_id != current_author_id:
                             author_instance.add_coauthor(a_id)
             self.__dataset_of_authors.append(author_instance)
-
-
-class ReviewsJSONReader(GeneralJSONReader):
-    def __init__(self, users_file_name: str, books_file_name: str, authors_file_name: str, reviews_file_name: str):
-        super().__init__(users_file_name, books_file_name, authors_file_name, reviews_file_name)
-        self.__dataset_of_reviews: List[Review] = []
-
-    @property
-    def dataset_of_reviews(self) -> List[Review]:
-        return self.__dataset_of_reviews
-
-    def read_json_files(self):
-        reviews_json = self.read_reviews_file()
-        books_json = self.read_books_file()
-        authors_json = self.read_authors_file()
-
-        if reviews_json:
-            for rj in reviews_json:
-                rj_book = None
-                for bj in books_json:
-                    if int(bj['book_id']) == int(rj['book_id']):
-                        rj_book = Book(int(bj['book_id']), bj['title'], bj['url'], bj['image_url'])
-                        rj_book.release_year = int(bj['publication_year'])
-                        rj_book.ave_rating = float(bj['average_rating'])
-                        for author in bj['authors']:
-                            a_id = int(author['author_id'])
-                            full_name = ""
-                            for aj in authors_json:
-                                if a_id == int(aj['author_id']):
-                                    full_name = aj['name']
-                                    break
-                            a = Author(a_id, full_name)
-                            rj_book.add_author(a)
-                        break
-                user_inst = User(rj['user']['user_name'], rj['user']['password'])
-                review_instance = Review(user_inst, rj_book, rj['review_text'], int(rj['rating']))
-                self.__dataset_of_reviews.append(review_instance)
-
-
-class UsersJSONReader(GeneralJSONReader):
-    def __init__(self, users_file_name: str, books_file_name: str, authors_file_name: str, reviews_file_name: str):
-        super().__init__(users_file_name, books_file_name, authors_file_name, reviews_file_name)
-        self.__dataset_of_users: List[User] = []
-
-    @property
-    def dataset_of_users(self) -> List[User]:
-        return self.__dataset_of_users
-
-    def read_json_files(self):
-        users_json = self.read_users_file()
-        reviews_json = self.read_reviews_file()
-        books_json = self.read_books_file()
-
-        if users_json:
-            for uj in users_json:
-                un = uj['user_name']
-                pw = uj['password']
-                user_instance = User(un, pw)
-                for book_id in uj['read_books']:
-                    for bj in books_json:
-                        if int(bj['book_id']) == int(book_id):
-                            book = Book(int(book_id), bj['title'], bj['url'], bj['image_url'])
-                            user_instance.read_a_book(book)
-                            break
-                for rj in reviews_json:
-                    if rj['user']['user_name'] == un:
-                        for bj in books_json:
-                            if int(bj['book_id']) == int(rj['book_id']):
-                                book = Book(int(bj['book_id']), bj['title'], bj['url'], bj['image_url'])
-                                r = Review(un, book, rj['review_text'], int(rj['rating']))
-                                user_instance.add_review(r)
-                                break
-                self.__dataset_of_users.append(user_instance)

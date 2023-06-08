@@ -322,7 +322,7 @@ class Review:
         else:
             self.__review_text = "N/A"
 
-        if isinstance(rating, int) and rating >= 1 and rating <= 5:
+        if isinstance(rating, int) and 1 <= rating <= 5:
             self.__rating = rating
         else:
             raise ValueError
@@ -364,7 +364,7 @@ class Review:
 
 
 class User:
-    def __init__(self, user_name: str, password: str):
+    def __init__(self, user_id: int, user_name: str, password: str):
         if user_name == "" or not isinstance(user_name, str):
             self.__user_name = None
         else:
@@ -375,9 +375,14 @@ class User:
         else:
             self.__password = password
 
+        self.__user_id = user_id
         self.__read_books = []
         self.__reviews = []
         self.__pages_read = 0
+
+    @property
+    def user_id(self) -> int:
+        return self.__user_id
 
     @property
     def user_name(self) -> str:
@@ -409,6 +414,13 @@ class User:
         if isinstance(review, Review):
             # Review objects are in practice always considered different due to their timestamp.
             self.__reviews.append(review)
+
+    def has_reviewed(self, book: Book):
+        r: Review
+        for r in self.__reviews:
+            if r.user == self.__user_id and r.book == book.book_id:
+                return True
+        return False
 
     def __repr__(self):
         return f'<User {self.user_name}>'
@@ -468,11 +480,15 @@ class ModelException(Exception):
     pass
 
 
-def make_review(review_text: str, user: User, book: Book, rating: int):
-    r = Review(user, book, review_text, rating)
+def make_review_association(r: Review, user: User, book: Book):
+    # A review connects a book to a user
+    # A book can only be reviewed by a user once
+
+    if user.has_reviewed(book):
+        raise ModelException(f' "{book.title}" has already been reviewed by user {user.user_name}')
+
     user.add_review(r)
     book.add_review(r)
-    return r
 
 
 def make_shelf_association(book: Book, shelf: Shelf):

@@ -51,7 +51,7 @@
         {% if book.book_id == show_reviews_for_book %}
         <div style="clear:both">
             {% for review in book.reviews %}
-                <p>{{review.review_text}}
+                <p> <strong>{{review.rating}}/5</strong> - {{review.review_text}}
                 <br><strong> by {{review.user_name}}, {{review.timestamp}} </strong>
                 </p>
             {% endfor %}

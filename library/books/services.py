@@ -1,7 +1,7 @@
 from typing import List, Iterable
 
 from library.adapters.repository import AbstractRepository
-from library.domain.model import make_review, Book, Review, Shelf, Author
+from library.domain.model import Book, Review, Shelf, Author
 
 
 class NonExistentBookException(Exception):
@@ -12,17 +12,22 @@ class UnknownUserException(Exception):
     pass
 
 
-def add_review(book_id: int, review_text: str, user_name: str, rating: float, repo: AbstractRepository):
+def add_review(book_id: int, review_text: str, user_id: int, rating: float, repo: AbstractRepository):
     book = repo.get_book_by_id(int(book_id))
     if book is None:
         raise NonExistentBookException
 
-    user = repo.get_user(user_name)
+    user = repo.get_user_by_id(user_id)
     if user is None:
         raise UnknownUserException
 
-    review = make_review(review_text, user, book, rating)
-    repo.add_book_review(review)
+    repo.add_book_review(
+        Review(
+            user=repo.get_user_by_id(user_id),
+            book=repo.get_book_by_id(book_id),
+            review_text=review_text,
+            rating=int(rating))
+    )
 
 
 def get_book(book_id: int, repo: AbstractRepository):
@@ -128,6 +133,7 @@ def review_to_dict(review: Review):
         'user_name': review.user.user_name,
         'book_id': review.book.book_id,
         'review_text': review.review_text,
+        'rating': review.rating,
         'timestamp': review.timestamp
     }
     return review_dict
