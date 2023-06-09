@@ -413,7 +413,7 @@ class User:
     def has_reviewed(self, book: Book):
         r: Review
         for r in self.__reviews:
-            if r.user == self.__user_id and r.book == book.book_id:
+            if r.user == self.__user_name and r.book == book.book_id:
                 return True
         return False
 
