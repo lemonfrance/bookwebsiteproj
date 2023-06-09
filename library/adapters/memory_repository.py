@@ -126,9 +126,6 @@ class MemoryRepository(AbstractRepository):
     def get_user(self, user_name) -> User:
         return next((user for user in self.__users if user.user_name == user_name), None)
 
-    def get_user_by_id(self, user_id) -> User:
-        return next((user for user in self.__users if user.user_id == user_id), None)
-
 
 # For JSON files (for books and authors)
 def read_json_files(data_path: Path, data_type):
@@ -176,12 +173,11 @@ def load_users(data_path: Path, repo: MemoryRepository):
     users_filepath = str(Path(data_path) / "users.csv")
     for u in read_csv_files(users_filepath):
         user_object = User(
-            user_id=int(u[0]),
             user_name=u[1],
             password=generate_password_hash(u[2])
         )
         repo.add_user(user_object)
-        user_dataset[int(u[0])] = user_object
+        user_dataset[int(u[1])] = user_object
     return user_dataset
 
 
@@ -190,7 +186,7 @@ def load_reviews(data_path: Path, repo: MemoryRepository):
 
     reviews_fpath = str(Path(data_path) / "user_reviews.csv")
     for r in read_csv_files(reviews_fpath):
-        reviewer_user = repo.get_user_by_id(int(r[1]))
+        reviewer_user = repo.get_user(int(r[1]))
         reviewed_book = repo.get_book_by_id(int(r[2]))
         review_object = Review(
             user=reviewer_user,

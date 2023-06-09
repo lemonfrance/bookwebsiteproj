@@ -12,18 +12,18 @@ class UnknownUserException(Exception):
     pass
 
 
-def add_review(book_id: int, review_text: str, user_id: int, rating: float, repo: AbstractRepository):
+def add_review(book_id: int, review_text: str, user_name: str, rating: float, repo: AbstractRepository):
     book = repo.get_book_by_id(int(book_id))
     if book is None:
         raise NonExistentBookException
 
-    user = repo.get_user_by_id(user_id)
+    user = repo.get_user(user_name)
     if user is None:
         raise UnknownUserException
 
     repo.add_book_review(
         Review(
-            user=repo.get_user_by_id(user_id),
+            user=repo.get_user(user_name),
             book=repo.get_book_by_id(book_id),
             review_text=review_text,
             rating=int(rating))
