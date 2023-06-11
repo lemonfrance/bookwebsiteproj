@@ -58,10 +58,10 @@ def login():
             # Authenticate user.
             services.authenticate_user(user['user_name'], form.password.data, repo.repo_instance)
 
-            # Initialise session and redirect the user to the home page.
+            # Initialise session and redirect the user to the account summary page.
             session.clear()
             session['user_name'] = user['user_name']
-            return redirect(url_for('home_bp.home'))
+            return redirect(url_for('home_bp.account'))
 
         except services.UnknownUserException:
             # User name not known to the system, set a suitable error message.
