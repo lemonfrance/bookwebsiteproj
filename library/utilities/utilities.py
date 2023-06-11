@@ -3,10 +3,24 @@ from flask import Blueprint, request, render_template, redirect, url_for, sessio
 import library.adapters.repository as repo
 import library.utilities.services as services
 
-
 # Configure Blueprint.
 utilities_blueprint = Blueprint(
     'utilities_bp', __name__)
+
+
+def get_login_status():
+    lg_status = False
+    if "user_name" in session:
+        lg_status = True
+    # True = signed in, False = not signed in
+    return lg_status
+
+
+def get_username():
+    username = ""
+    if "user_name" in session:
+        username = str(session['user_name'])
+    return username
 
 
 def get_five_latest_books():
@@ -65,3 +79,32 @@ def get_selected_shelves(quantity):
     for s in shelves:
         s['hyperlink'] = url_for('books_bp.display_by_shelves')
     return shelves
+
+
+def get_last_five_sorted_rpreviews(username):
+    user_reviews = services.get_user_reviews(username, repo.repo_instance)
+    total_review_num = len(user_reviews)
+    user_reviews = reversed(user_reviews[-5:])
+
+    review_previews = list()
+
+    for ur in user_reviews:
+        b_id = ur['book'].book_id
+        title = ur['book'].title
+        rating = ur['rating']
+        text = ur['review_text']
+
+        if len(title) > 35:
+            title = title[:32]+"..."
+        if len(text) > 35:
+            title = text[:32]+"..."
+
+        review_previews += [
+            ('"{}" ({}/5) - {}'.format(title, rating, text),
+            url_for('books_bp.display_book_info', book_id=b_id,
+                    view_reviews_for=b_id))
+        ]
+
+    # Returns the total number of reviews and a list containing tuples
+    # of review preview data, particularly a preview text and a link to book_info.html.
+    return [total_review_num, review_previews]
