@@ -1,8 +1,9 @@
+from pathlib import Path
+
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from library.adapters.repository import AbstractRepository
 from library.domain.model import User
-
 
 class NameNotUniqueException(Exception):
     pass
@@ -23,6 +24,23 @@ def add_user(user_name: str, password: str, repo: AbstractRepository):
     password_hash = generate_password_hash(password)
     user = User(user_name, password_hash)
     repo.add_user(user)
+
+    data_path = Path('library') / 'adapters' / 'data'
+    users_path = str(Path(data_path) / "users.csv")
+
+    with open(users_path, 'r') as users_file:
+        r = users_file.readlines()
+        last_row = r[-1]
+        user_id = last_row[0]
+
+    with open(users_path, 'a') as users_file:
+        users_file.write(
+            "\n{},{},{}".format(
+                int(user_id) + 1,
+                user_name,
+                password
+            )
+        )
 
 
 def get_user(user_name: str, repo: AbstractRepository):
