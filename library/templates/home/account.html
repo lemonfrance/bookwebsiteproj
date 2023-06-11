@@ -1,6 +1,27 @@
 {% extends 'layout.html' %} {% block content %}
 <main id="main">
-    <h1>Welcome, User!</h1>
+    <h1>Welcome, {{username}}!</h1>
 
+    <p>
+        <strong>Reviews written:</strong> {{reviews_num}}
+    </p>
+
+    <p>
+        {% if review_previews==[] %}
+            You have not written any reviews!
+        {% else %}
+            <strong>Most recent reviews:</strong>
+            <ul>
+            {% for rp in review_previews %}
+                <li>
+                    &nbsp
+                    <a href="{{rp[1]}}">
+                    {{rp[0]}}
+                    </a>
+                </li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    </p>
 </main>
 {% endblock %}
