@@ -39,7 +39,9 @@ def register():
         title='litCrave - Register as New User',
         form=form,
         user_name_error_message=user_name_not_unique,
-        handler_url=url_for('authentication_bp.register')
+        handler_url=url_for('authentication_bp.register'),
+        lg_status=utilities.get_login_status(),
+        username=utilities.get_username()
     )
 
 
@@ -78,7 +80,9 @@ def login():
         title='litCrave - Login',
         user_name_error_message=user_name_not_recognised,
         password_error_message=password_does_not_match_user_name,
-        form=form
+        form=form,
+        lg_status=utilities.get_login_status(),
+        username=utilities.get_username()
     )
 
 
