@@ -56,7 +56,9 @@ def write_review():
         title='Write Review',
         book=book,
         form=form,
-        handler_url=url_for('reviews_bp.write_review')
+        handler_url=url_for('reviews_bp.write_review'),
+        lg_status=utilities.get_login_status(),
+        username=utilities.get_username()
     )
 
 
