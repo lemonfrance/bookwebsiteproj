@@ -1,5 +1,8 @@
 <div id="nav">
-    <p> <a style="float:left;display: inline;" href="{{url_for('home_bp.home')}}">Home </a>
+    <p> {% if lg_status == True %}
+            <a style="float:left;display: inline;" href="{{url_for('home_bp.account')}}">Account &nbsp |</a>
+        {% endif %}
+        <a style="float:left;display: inline;" href="{{url_for('home_bp.home')}}">&nbsp Home </a>
         <div class="nav-text">&nbsp| Books |&nbsp<br>
         <div class="nav-dropdown">
             <a class="link_text" href="{{url_for('books_bp.display_all_books')}}">All Books</a>
