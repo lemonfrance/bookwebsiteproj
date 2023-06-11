@@ -2,7 +2,7 @@ from typing import Iterable
 import random
 
 from library.adapters.repository import AbstractRepository
-from library.domain.model import Book, Author, Shelf
+from library.domain.model import Book, Author, Shelf, Review, User
 
 
 def get_year_sorted_books(repo: AbstractRepository):
@@ -33,12 +33,12 @@ def get_book_ids(repo: AbstractRepository):
 
 
 def get_random_n_shelves(n: int, repo: AbstractRepository):
-    shelf_count:int = len(repo.get_all_shelves())
+    shelf_count: int = len(repo.get_all_shelves())
     if n >= shelf_count:
         n = shelf_count - 1
 
     # Pick distinct and random shelves.
-    #random_indexes = random.sample(range(1, shelf_count), n)
+    # random_indexes = random.sample(range(1, shelf_count), n)
     random_indexes = []
     for i in range(0, n):
         random_indexes += [random.choice(range(0, shelf_count))]
@@ -47,6 +47,12 @@ def get_random_n_shelves(n: int, repo: AbstractRepository):
     for ri in random_indexes:
         random_shelves += [all_shelves[ri]]
     return shelves_to_dict(random_shelves)
+
+
+def get_user_reviews(username: str, repo: AbstractRepository):
+    user = repo.get_user(username)
+    user_reviews = repo.get_user_reviews(user)
+    return reviews_to_dict(user_reviews)
 
 
 # ============================================
@@ -84,7 +90,7 @@ def shelves_to_dict(shelves: Iterable[Shelf]):
 
 
 def author_to_dict(author: Author):
-    if author.full_name!=None:
+    if author.full_name != None:
         author_dict = {
             'full_name': author.full_name,
             'author_id': author.unique_id
@@ -94,3 +100,19 @@ def author_to_dict(author: Author):
 
 def authors_to_dict(authors: Iterable[Author]):
     return [author_to_dict(au) for au in authors]
+
+
+def review_to_dict(review: Review):
+    review_dict = {
+        'book': review.book,
+        'user': review.user,
+        'rating': review.rating,
+        'review_text': review.review_text,
+        # 'timestamp': review.timestamp
+        'timestamp': 0
+    }
+    return review_dict
+
+
+def reviews_to_dict(reviews: Iterable[Review]):
+    return [review_to_dict(r) for r in reviews]
