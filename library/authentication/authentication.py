@@ -39,7 +39,9 @@ def register():
         title='litCrave - Register as New User',
         form=form,
         user_name_error_message=user_name_not_unique,
-        handler_url=url_for('authentication_bp.register')
+        handler_url=url_for('authentication_bp.register'),
+        lg_status=utilities.get_login_status(),
+        username=utilities.get_username()
     )
 
 
@@ -58,10 +60,10 @@ def login():
             # Authenticate user.
             services.authenticate_user(user['user_name'], form.password.data, repo.repo_instance)
 
-            # Initialise session and redirect the user to the home page.
+            # Initialise session and redirect the user to the account summary page.
             session.clear()
             session['user_name'] = user['user_name']
-            return redirect(url_for('home_bp.home'))
+            return redirect(url_for('home_bp.account'))
 
         except services.UnknownUserException:
             # User name not known to the system, set a suitable error message.
@@ -78,7 +80,9 @@ def login():
         title='litCrave - Login',
         user_name_error_message=user_name_not_recognised,
         password_error_message=password_does_not_match_user_name,
-        form=form
+        form=form,
+        lg_status=utilities.get_login_status(),
+        username=utilities.get_username()
     )
 
 

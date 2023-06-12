@@ -117,7 +117,7 @@ class MemoryRepository(AbstractRepository):
         return [r for r in self.__book_reviews if book.book_id == r.book.book_id]
 
     def get_user_reviews(self, user: User) -> List[Review]:
-        return [u for u in self.__book_reviews if user.user_id == u.user.user_id]
+        return [u for u in self.__book_reviews if user.user_name == u.user.user_name]
 
     # User methods
     def add_user(self, user: User):
@@ -125,9 +125,6 @@ class MemoryRepository(AbstractRepository):
 
     def get_user(self, user_name) -> User:
         return next((user for user in self.__users if user.user_name == user_name), None)
-
-    def get_user_by_id(self, user_id) -> User:
-        return next((user for user in self.__users if user.user_id == user_id), None)
 
 
 # For JSON files (for books and authors)
@@ -176,12 +173,11 @@ def load_users(data_path: Path, repo: MemoryRepository):
     users_filepath = str(Path(data_path) / "users.csv")
     for u in read_csv_files(users_filepath):
         user_object = User(
-            user_id=int(u[0]),
             user_name=u[1],
             password=generate_password_hash(u[2])
         )
         repo.add_user(user_object)
-        user_dataset[int(u[0])] = user_object
+        user_dataset[u[1]] = user_object
     return user_dataset
 
 
@@ -190,7 +186,7 @@ def load_reviews(data_path: Path, repo: MemoryRepository):
 
     reviews_fpath = str(Path(data_path) / "user_reviews.csv")
     for r in read_csv_files(reviews_fpath):
-        reviewer_user = repo.get_user_by_id(int(r[1]))
+        reviewer_user = repo.get_user(r[1])
         reviewed_book = repo.get_book_by_id(int(r[2]))
         review_object = Review(
             user=reviewer_user,
@@ -198,7 +194,7 @@ def load_reviews(data_path: Path, repo: MemoryRepository):
             review_text=str(r[3]),
             rating=int(r[4])
         )
-        make_review_association(review_object,reviewer_user,reviewed_book)
+        make_review_association(review_object, reviewer_user, reviewed_book)
         repo.add_book_review(review_object)
         review_dataset[int(r[0])] = review_object
     return review_dataset

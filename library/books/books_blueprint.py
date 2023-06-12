@@ -64,7 +64,9 @@ def display_all_books():
         first_book_url=first_book_url,
         last_book_url=last_book_url,
         prev_book_url=prev_book_url,
-        next_book_url=next_book_url
+        next_book_url=next_book_url,
+        lg_status=utilities.get_login_status(),
+        username=utilities.get_username()
     )
 
 
@@ -115,7 +117,9 @@ def display_by_shelves():
         title='Our Book Shelves',
         random_20_shelf_names=random_20_shelf_names,
         all_shelves=all_shelves,
-        shelves=shelves_with_books
+        shelves=shelves_with_books,
+        lg_status=utilities.get_login_status(),
+        username=utilities.get_username()
     )
 
 
@@ -151,5 +155,7 @@ def display_book_info():
         title=book['title'],
         book=book,
         shelf_urls=utilities.get_shelves_and_urls(),
-        show_reviews_for_book=book_to_show_reviews
+        show_reviews_for_book=book_to_show_reviews,
+        lg_status=utilities.get_login_status(),
+        username=utilities.get_username()
     )

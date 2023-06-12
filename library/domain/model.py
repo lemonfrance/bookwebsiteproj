@@ -364,7 +364,7 @@ class Review:
 
 
 class User:
-    def __init__(self, user_id: int, user_name: str, password: str):
+    def __init__(self, user_name: str, password: str):
         if user_name == "" or not isinstance(user_name, str):
             self.__user_name = None
         else:
@@ -375,14 +375,9 @@ class User:
         else:
             self.__password = password
 
-        self.__user_id = user_id
         self.__read_books = []
         self.__reviews = []
         self.__pages_read = 0
-
-    @property
-    def user_id(self) -> int:
-        return self.__user_id
 
     @property
     def user_name(self) -> str:
@@ -418,7 +413,7 @@ class User:
     def has_reviewed(self, book: Book):
         r: Review
         for r in self.__reviews:
-            if r.user == self.__user_id and r.book == book.book_id:
+            if r.user == self.__user_name and r.book == book.book_id:
                 return True
         return False
 

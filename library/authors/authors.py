@@ -58,5 +58,7 @@ def all_authors():
         first_au_url=first_au_url,
         last_au_url=last_au_url,
         prev_au_url=prev_au_url,
-        next_au_url=next_au_url
+        next_au_url=next_au_url,
+        lg_status=utilities.get_login_status(),
+        username=utilities.get_username()
     )
