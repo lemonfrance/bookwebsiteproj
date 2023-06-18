@@ -1,7 +1,8 @@
+import datetime
 from typing import List, Iterable
 
 from library.adapters.repository import AbstractRepository
-from library.domain.model import Book, Review, Shelf, Author
+from library.domain.model import Book, Review, Shelf, Author, make_review
 
 
 class NonExistentBookException(Exception):
@@ -21,13 +22,13 @@ def add_review(book_id: int, review_text: str, user_name: str, rating: float, re
     if user is None:
         raise UnknownUserException
 
-    repo.add_book_review(
-        Review(
-            user=repo.get_user(user_name),
-            book=repo.get_book_by_id(book_id),
-            review_text=review_text,
-            rating=int(rating))
+    r = make_review(
+        user=user,
+        book=book,
+        review_text=review_text,
+        rating=int(rating)
     )
+    repo.add_book_review(r)
 
 
 def get_book(book_id: int, repo: AbstractRepository):
