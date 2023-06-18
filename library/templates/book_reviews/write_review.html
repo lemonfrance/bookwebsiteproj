@@ -4,15 +4,18 @@
 <main id="main">
     <div>
         <h1 class="title">{{ title }}</h1>
+        <br>
         <form method="POST" action="{{ handler_url }}">
-             {{ form.csrf_token }} <!-- Need to include this token - Flask WTForms requires it. -->
+            {{ form.csrf_token }} <!-- Need to include this token - Flask WTForms requires it. -->
+            {{ form.book }} <!--Hidden field-->
             <div class="form-field">
-                {{ form.book_id }}
+                {{ form.rating.label }} &nbsp
+                {{ form.rating }}
             </div>
-            <div class="form-field">
-                {{ form.rating.label }} {{ form.rating }}
-            </div>
-            <div class="form-field">{{ form.review.label }} {{ form.review }}
+            <br>
+            <div class="form-field">{{ form.review.label }}
+                <br>
+                {{ form.review }}
                 {% if form.review.errors or review_error_message is not none %}
                     <ul class="errors">
                         {% if review_error_message is not none %}
@@ -20,9 +23,13 @@
                                 {{ review_error_message }}
                             </li>
                         {% endif %}
+                        {% for error in form.review.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
                     </ul>
                 {% endif %}
             </div>
+            <br>
             {{ form.submit }}
         </form>
     </div>
