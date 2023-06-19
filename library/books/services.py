@@ -47,15 +47,6 @@ def add_review(book_id: int, user_name: str, review_text: str, rating: int, repo
         )
 
 
-def get_reviews_for_book(book_id, repo: AbstractRepository):
-    book = repo.get_book_by_id(book_id)
-
-    if book is None:
-        raise NonExistentBookException
-
-    return reviews_to_dict(book.reviews)
-
-
 def get_book(book_id: int, repo: AbstractRepository):
     b = repo.get_book_by_id(book_id)
     if b is None:
