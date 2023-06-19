@@ -162,7 +162,7 @@ def write_review():
     # If form successful
     if form.validate_on_submit():
         book_id = int(form.book.data)
-        services.add_review(book_id, form.review.data, user_name, form.rating.data, repo.repo_instance)
+        services.add_review(book_id, user_name, form.review.data, form.rating.data, repo.repo_instance)
         book = services.get_book(book_id, repo.repo_instance)
         return redirect(url_for('books_bp.display_book_info', book_id=book['book_id']))
 
