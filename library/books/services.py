@@ -40,7 +40,7 @@ def add_review(book_id: int, user_name: str, review_text: str, rating: int, repo
                 int(review_id) + 1,
                 user_name,
                 book_id,
-                review_text,
+                '"'+review_text+'"',
                 rating,
                 new_review.timestamp
             )
