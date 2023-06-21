@@ -40,23 +40,42 @@
         </div>
 
         <br>
-
-        <div style="position:static;display:block;">
-            {% if book.reviews|length > 0 and book.id != show_reviews_for_book %}
-                <button class="working_btn" onclick="location.href='{{ book.view_review_url }}'">{{ book.reviews|length }} reviews</button>
-            {% endif %}
-            <button class="working_btn" onclick="location.href='{{ book.write_review_url }}'">Write Review</button>
-        </div>
-
-        {% if book.book_id == show_reviews_for_book %}
-        <div style="clear:both">
-            {% for review in book.reviews %}
-                <p> <strong>{{review.rating}}/5</strong> - {{review.review_text}}
-                <br><strong> by {{review.user_name}}, {{review.timestamp}} </strong>
-                </p>
-            {% endfor %}
-        </div>
+        {% if book.reviews|length > 0 %}
+            <button class="working_btn" onclick="show_or_hide_div('review_previews')">
+                {{ book.reviews|length }} reviews
+                <i id="caret-down" style="display:none;" class="fa fa-caret-down fa-lg" aria-hidden="true"></i>
+                <i id="caret-up" style="display:none;" class="fa fa-caret-up fa-lg" aria-hidden="true"></i>
+            </button>
+            <script type="text/javascript">
+            function show_or_hide_div(id){
+                var rp_div = document.getElementById(id);
+                var up = document.getElementById('caret-up');
+                var down = document.getElementById('caret-down');
+                if (rp_div.style.display === "none") {
+                    rp_div.style.display = "block";
+                    up.style.display = "inline-block";
+                    down.style.display = "none";
+                } else {
+                    rp_div.style.display = "none";
+                    up.style.display = "none";
+                    down.style.display = "inline-block";
+                }
+            }
+            </script>
+        {% else %}
+            No reviews yet.
         {% endif %}
+
+        <div id="review_previews" style="clear:both">
+        {% for review in book.reviews %}
+            <p> <strong>{{review.rating}}/5</strong> - {{review.review_text}}
+            <br><strong> by {{review.user_name}}, {{review.timestamp}} </strong>
+            </p>
+        {% endfor %}
+        </div>
+
+        <button class="working_btn" onclick="location.href='{{book.write_review_url}}'">Write Review</button>
+
     </article>
 </main>
 {% endblock %}

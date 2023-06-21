@@ -8,7 +8,7 @@ from bisect import insort_left
 from werkzeug.security import generate_password_hash
 
 from library.adapters.repository import AbstractRepository, RepositoryException
-from library.domain.model import Book, Author, Publisher, Review, User, Shelf, make_review_association
+from library.domain.model import Book, Author, Publisher, Review, User, Shelf, make_review
 from library.adapters.jsondatareader import BooksJSONReader, AuthorsJSONReader
 
 repo_instance = None
@@ -182,22 +182,16 @@ def load_users(data_path: Path, repo: MemoryRepository):
 
 
 def load_reviews(data_path: Path, repo: MemoryRepository):
-    review_dataset = dict()
-
     reviews_fpath = str(Path(data_path) / "user_reviews.csv")
     for r in read_csv_files(reviews_fpath):
         reviewer_user = repo.get_user(r[1])
         reviewed_book = repo.get_book_by_id(int(r[2]))
-        review_object = Review(
-            user=reviewer_user,
-            book=reviewed_book,
-            review_text=str(r[3]),
-            rating=int(r[4])
-        )
-        make_review_association(review_object, reviewer_user, reviewed_book)
+        review_text = str(r[3])
+        rating = int(r[4])
+        timestamp = datetime.fromisoformat(r[5])
+
+        review_object = make_review(reviewer_user, reviewed_book, review_text, rating, timestamp)
         repo.add_book_review(review_object)
-        review_dataset[int(r[0])] = review_object
-    return review_dataset
 
 
 def populate(data_path: Path, repo: MemoryRepository):

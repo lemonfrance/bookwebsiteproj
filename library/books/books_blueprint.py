@@ -1,10 +1,12 @@
 from typing import List
 
+import wtforms.fields
+from better_profanity import profanity
 from flask import Blueprint
 from flask import request, render_template, redirect, url_for, session
 from flask_wtf import FlaskForm
-from wtforms import IntegerField, SubmitField
-from wtforms.validators import DataRequired
+from wtforms import IntegerField, SubmitField, TextAreaField, HiddenField, IntegerRangeField, StringField, SelectField
+from wtforms.validators import DataRequired, Length, ValidationError, NumberRange, InputRequired
 
 import library.adapters.repository as repo
 import library.books.services as services
@@ -27,7 +29,6 @@ def display_all_books():
     else:
         cursor = int(cursor)
 
-
     # Retrieve the batch of books to display on the Web page.
     all_books = services.get_all_books(repo.repo_instance)
     books = all_books[cursor:cursor + books_per_page]
@@ -39,8 +40,8 @@ def display_all_books():
 
     if cursor > 0:
         # There are preceding books, so generate URLs for the 'previous' and 'first' navigation buttons.
-        prev_book_url = url_for('books_bp.display_all_books', cursor = cursor - books_per_page)
-        first_book_url = url_for('books_bp.display_all_books',)
+        prev_book_url = url_for('books_bp.display_all_books', cursor=cursor - books_per_page)
+        first_book_url = url_for('books_bp.display_all_books', )
 
     if cursor + books_per_page < len(all_books):
         # There are further books, so generate URLs for the 'next' and 'last' navigation buttons.
@@ -87,7 +88,7 @@ def display_by_shelves():
     shelves_with_books = []
     all_view_urls = utilities.get_books_and_urls()
     if shelf_name is None:
-        top_5_shelves = services.get_top_n_shelves(5,repo.repo_instance)
+        top_5_shelves = services.get_top_n_shelves(5, repo.repo_instance)
         for ts in top_5_shelves:
             book_ids = ts['shelved_books']
             shelf_books = [services.get_books_by_id(book_ids, repo.repo_instance)]
@@ -129,33 +130,78 @@ def display_book_info():
 
     # Read query parameters.
     book_id = request.args.get('book_id')
-    book_to_show_reviews = request.args.get('view_reviews_for')
-
-    if book_to_show_reviews is None:
-        book_to_show_reviews = -1
-    else:
-        book_to_show_reviews = int(book_to_show_reviews)
-
     # Retrieve book from book_id.
     try:
         book = services.get_book(int(book_id), repo.repo_instance)
+        # Construct urls for viewing book reviews and writing reviews.
+        # if logged in: go to write review page. otherwise: go to login page
+        if 'user_name' in session:
+            book['write_review_url'] = url_for('books_bp.write_review', book_id=book['book_id'])
+        else:
+            book['write_review_url'] = url_for('authentication_bp.login')
+
+        # Generate the webpage to display book info.
+        return render_template(
+            'books/book_info.html',
+            title=book['title'],
+            book=book,
+            shelf_urls=utilities.get_shelves_and_urls(),
+            lg_status=utilities.get_login_status(),
+            username=utilities.get_username()
+        )
+
     except services.NonExistentBookException:
         redirect(url_for('home_bp.home'))
 
-    # Construct urls for viewing book reviews and writing reviews.
-    book['view_review_url'] = url_for('books_bp.display_book_info', book=book['book_id'],
-                                      view_reviews_for=book['book_id'])
-    # if logged in: go to write review page. otherwise: go to login page
-    # book['write_review_url'] = url_for('auth_bp.login', book=book['book_id'])
-    #book['write_review_url'] = url_for('reviews_bp.write_book_review', book=book['book_id'])
 
-    # Generate the webpage to display the articles.
+@books_blueprint.route('/write_review', methods=['GET', 'POST'])
+def write_review():
+    user_name = session['user_name']
+    form = ReviewForm()
+
+    # If form successful
+    if form.validate_on_submit():
+        book_id = int(form.book.data)
+        services.add_review(book_id, user_name, form.review.data, form.rating.data, repo.repo_instance)
+        book = services.get_book(book_id, repo.repo_instance)
+        return redirect(url_for('books_bp.display_book_info', book_id=book['book_id']))
+
+    if request.method == 'GET':
+        book_id = int(request.args.get('book_id'))
+        form.book.data = book_id
+    else:
+        book_id = int(form.book.data)
+    book = services.get_book(book_id, repo.repo_instance)
     return render_template(
-        'books/book_info.html',
-        title=book['title'],
+        'book_reviews/write_review.html',
+        title='Write Review',
         book=book,
-        shelf_urls=utilities.get_shelves_and_urls(),
-        show_reviews_for_book=book_to_show_reviews,
+        form=form,
+        handler_url=url_for('books_bp.write_review', book_id=book['book_id']),
         lg_status=utilities.get_login_status(),
         username=utilities.get_username()
     )
+
+
+class ProfanityFree:
+    def __init__(self, message=None):
+        if not message:
+            message = u'Field must not contain profanity'
+        self.message = message
+
+    def __call__(self, form, field):
+        if profanity.contains_profanity(field.data):
+            raise ValidationError(self.message)
+
+
+class ReviewForm(FlaskForm):
+    review = TextAreaField('Review:', [
+        DataRequired(message='Review must not be empty.'),
+        Length(max=256, message='Review length is past the maximum length.'),
+        ProfanityFree(message='Your review must not contain profanity.')])
+    rating = SelectField(label='Rating:', validators=[
+        InputRequired(),
+        NumberRange(min=0, max=5, message="You can only rate from 0 to 5.")],
+        coerce=int, choices=[0, 1, 2, 3, 4, 5])
+    book = HiddenField("Book id")
+    submit = SubmitField('Submit')

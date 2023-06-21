@@ -309,7 +309,7 @@ class Shelf:
 
 
 class Review:
-    def __init__(self, user: 'User', book: Book, review_text: str, rating: int):
+    def __init__(self, user: 'User', book: Book, review_text: str, rating: int, timestamp: datetime):
         self.__user = user
 
         if isinstance(book, Book):
@@ -327,7 +327,7 @@ class Review:
         else:
             raise ValueError
 
-        self.__timestamp = datetime.now()
+        self.__timestamp = timestamp
 
     @property
     def user(self) -> 'User':
@@ -475,15 +475,12 @@ class ModelException(Exception):
     pass
 
 
-def make_review_association(r: Review, user: User, book: Book):
-    # A review connects a book to a user
-    # A book can only be reviewed by a user once
-
-    if user.has_reviewed(book):
-        raise ModelException(f' "{book.title}" has already been reviewed by user {user.user_name}')
-
+def make_review(user: User, book: Book, review_text: str, rating: int, timestamp: datetime = datetime.today()):
+    r = Review(user, book, review_text, rating, timestamp)
     user.add_review(r)
     book.add_review(r)
+
+    return r
 
 
 def make_shelf_association(book: Book, shelf: Shelf):

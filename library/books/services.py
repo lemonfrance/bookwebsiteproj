@@ -1,7 +1,9 @@
+import datetime
+from pathlib import Path
 from typing import List, Iterable
 
 from library.adapters.repository import AbstractRepository
-from library.domain.model import Book, Review, Shelf, Author
+from library.domain.model import Book, Review, Shelf, Author, make_review
 
 
 class NonExistentBookException(Exception):
@@ -12,22 +14,37 @@ class UnknownUserException(Exception):
     pass
 
 
-def add_review(book_id: int, review_text: str, user_name: str, rating: float, repo: AbstractRepository):
-    book = repo.get_book_by_id(int(book_id))
-    if book is None:
-        raise NonExistentBookException
+def add_review(book_id: int, user_name: str, review_text: str, rating: int, repo: AbstractRepository):
+    book = repo.get_book_by_id(book_id)
 
-    user = repo.get_user(user_name)
-    if user is None:
-        raise UnknownUserException
-
-    repo.add_book_review(
-        Review(
-            user=repo.get_user(user_name),
-            book=repo.get_book_by_id(book_id),
-            review_text=review_text,
-            rating=int(rating))
+    new_review = make_review(
+        user=repo.get_user(user_name),
+        book=repo.get_book_by_id(book_id),
+        review_text=review_text,
+        rating=rating
     )
+
+    repo.add_book_review(new_review)
+
+    data_path = Path('library') / 'adapters' / 'data'
+    reviews_path = str(Path(data_path) / "user_reviews.csv")
+
+    with open(reviews_path, 'r') as reviews_file:
+        r = reviews_file.readlines()
+        last_row = r[-1]
+        review_id = last_row[0]
+
+    with open(reviews_path, 'a') as reviews_file:
+        reviews_file.write(
+            "\n{},{},{},{},{},{}".format(
+                int(review_id) + 1,
+                user_name,
+                book_id,
+                '"'+review_text+'"',
+                rating,
+                new_review.timestamp
+            )
+        )
 
 
 def get_book(book_id: int, repo: AbstractRepository):
