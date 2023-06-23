@@ -114,7 +114,7 @@ def display_by_shelves():
 
     # Generate the webpage to display the shelves and books.
     return render_template(
-        'books/books_all.html',
+        'books/books_by_shelves.html',
         title='Our Book Shelves',
         random_20_shelf_names=random_20_shelf_names,
         all_shelves=all_shelves,
