@@ -61,7 +61,7 @@ def get_shelves_and_urls():
     shelf_names = services.get_shelf_names(repo.repo_instance)
     shelf_urls = dict()
     for s_name in shelf_names:
-        shelf_urls[s_name] = url_for('books_bp.display_by_shelves', shelf=s_name)
+        shelf_urls[s_name] = url_for('books_bp.display_shelf_books', shelf_name=s_name)
     return shelf_urls
 
 
