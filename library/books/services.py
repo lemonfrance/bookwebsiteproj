@@ -74,6 +74,52 @@ def get_all_shelves(repo: AbstractRepository):
     return shelves_to_dict(shelves)
 
 
+def get_sorted_shelves(repo: AbstractRepository):
+    shelves = repo.get_all_shelves()
+    shelf_names = dict()
+    for s in shelves:
+        shelf_names[s.name] = s
+    alphabetical_names = sorted(shelf_names.keys())
+    sorted_shelves = dict()
+    for name in alphabetical_names:
+        sorted_shelves[name] = shelf_names[name]
+    shelves = sorted_shelves.values()
+    return shelves
+
+
+def categorize_shelves(repo: AbstractRepository):
+    sorted_shelves = get_sorted_shelves(repo)
+    alphabetical_dict = dict()
+    other_list = []
+
+    # Sorting shelves into lists in an unordered dict
+    for shelf in sorted_shelves:
+        first_char = str(shelf.name[0])
+        if first_char.islower():
+            first_char = first_char.capitalize()
+        if first_char not in alphabetical_dict:
+            alphabetical_dict[first_char] = []
+
+        shelf = shelf_to_dict(shelf)
+        if first_char in list('ABCDEFGHIJKLMNOPQRSTUVWXYZ'):
+            alphabetical_dict[first_char] += [shelf]
+        elif first_char in list('0123456789'):
+            alphabetical_dict[first_char] += [shelf]
+        else:
+            del alphabetical_dict[first_char]
+            other_list += [shelf]
+
+    final_dict = dict()
+    sorted_keys = sorted(alphabetical_dict.keys())
+
+    for a in sorted_keys:
+        final_dict[a] = alphabetical_dict[a]
+
+    final_dict['Other'] = other_list
+
+    return final_dict
+
+
 def get_shelf_data(shelf_name, repo: AbstractRepository):  # get_book_ids_for_shelf
     shelf = repo.get_shelf_by_name(shelf_name)  # -> Shelf
     s = shelf_to_dict(shelf)
