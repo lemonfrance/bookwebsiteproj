@@ -73,52 +73,14 @@ def display_all_books():
 
 @books_blueprint.route('/display_by_shelves', methods=['GET'])
 def display_by_shelves():
-    books_per_page = 8
-
-    # Read query parameters.
-    shelf_name = request.args.get('shelf')
-
-    all_shelves = services.get_all_shelves(repo.repo_instance)
-
-    # Retrieve random shelf names to recommend
-    random_20_shelf_names = utilities.get_selected_shelves(20)
-
-    # If shelf_name is None, retrieve the batch of books per shelf in top 5 shelves to display on the Web page.
-    # Else, retrieve batch of books based on shelf_name to display on the Web page.
-    shelves_with_books = []
-    all_view_urls = utilities.get_books_and_urls()
-    if shelf_name is None:
-        top_5_shelves = services.get_top_n_shelves(5, repo.repo_instance)
-        for ts in top_5_shelves:
-            book_ids = ts['shelved_books']
-            shelf_books = [services.get_books_by_id(book_ids, repo.repo_instance)]
-            for sb in shelf_books:
-                sb['view_info_url'] = all_view_urls[sb['book_id']]
-            shelves_with_books += [
-                {
-                    'name': [ts['name']],
-                    'shelved_books': shelf_books
-                }
-            ]
-    else:
-        book_ids = services.get_shelf_data(shelf_name)['shelved_books']
-        shelf_books = [services.get_books_by_id(book_ids, repo.repo_instance)]
-        for sb in shelf_books:
-            sb['view_info_url'] = all_view_urls[sb['book_id']]
-        shelves_with_books += [
-            {
-                'name': shelf_name,
-                'shelved_books': shelf_books
-            }
-        ]
+    alphabetical_shelves = services.categorize_shelves(repo.repo_instance)
 
     # Generate the webpage to display the shelves and books.
     return render_template(
         'books/books_by_shelves.html',
         title='Our Book Shelves',
-        random_20_shelf_names=random_20_shelf_names,
-        all_shelves=all_shelves,
-        shelves=shelves_with_books,
+        all_categories=alphabetical_shelves.keys(),
+        all_shelves=alphabetical_shelves,
         lg_status=utilities.get_login_status(),
         username=utilities.get_username()
     )
