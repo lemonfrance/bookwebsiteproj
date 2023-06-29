@@ -6,6 +6,10 @@ from library.adapters.repository import AbstractRepository
 from library.domain.model import Book, Review, Shelf, Author, make_review
 
 
+class NonExistentShelfException(Exception):
+    pass
+
+
 class NonExistentBookException(Exception):
     pass
 
