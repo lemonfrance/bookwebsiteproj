@@ -8,7 +8,7 @@ from bisect import insort_left
 from werkzeug.security import generate_password_hash
 
 from library.adapters.repository import AbstractRepository, RepositoryException
-from library.domain.model import Book, Author, Publisher, Review, User, Shelf, make_review
+from library.domain.model import Book, Author, Publisher, Review, User, Shelf, make_review, make_shelf_association
 from library.adapters.jsondatareader import BooksJSONReader, AuthorsJSONReader
 
 repo_instance = None
@@ -126,6 +126,10 @@ class MemoryRepository(AbstractRepository):
     def get_user(self, user_name) -> User:
         return next((user for user in self.__users if user.user_name == user_name), None)
 
+    # Shelf methods
+    def add_shelf(self, shelf: Shelf):
+        self.__shelves.append(shelf)
+
 
 # For JSON files (for books and authors)
 def read_json_files(data_path: Path, data_type):
@@ -194,8 +198,16 @@ def load_reviews(data_path: Path, repo: MemoryRepository):
         repo.add_book_review(review_object)
 
 
+def load_shelves(repo: MemoryRepository):
+    all_books = repo.get_all_books()
+    for b in all_books:
+        for s in b.shelves:
+            repo.add_shelf(s)
+
+
 def populate(data_path: Path, repo: MemoryRepository):
     load_book_info(data_path, repo)
     load_author_info(data_path, repo)
     load_users(data_path, repo)
     load_reviews(data_path, repo)
+    load_shelves(repo)
