@@ -70,6 +70,12 @@ class AbstractRepository(abc.ABC):
         """
         raise NotImplementedError
 
+    # Shelf methods
+    @abc.abstractmethod
+    def add_shelf(self, shelf: Shelf):
+        """ Adds a Shelf to the repository. """
+        raise NotImplementedError
+
     @abc.abstractmethod
     def get_shelf_by_name(self, shelf_name) -> Shelf:
         """ Returns the Shelf named shelf_name from the repository.
