@@ -3,12 +3,15 @@
 {% block content %}
 
 <main id="main">
-    <p> Shelves to look into: </p>
+    <h1>{{title}}</h1>
     <br>
     {% for c in all_categories %}
-        <h3>{{ c }}</h3>
+        <h2>{{ c }}</h2>
         {% for shelf in all_shelves[c] %}
-        <p>{{shelf.name}}</p>
+        <p><button class='shelf_btns' onclick="location.href='{{shelf.shelf_url}}'">
+            {{shelf.name}}
+        </button>
+        </p>
         {% endfor %}
     <br>
     {% endfor %}
