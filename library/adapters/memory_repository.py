@@ -128,7 +128,13 @@ class MemoryRepository(AbstractRepository):
 
     # Shelf methods
     def add_shelf(self, shelf: Shelf):
+        if shelf in self.__shelves:
+            i = self.__shelves.index(shelf)
+            s = self.__shelves.pop(i)
+            for b in s.shelved_books:
+                shelf.add_book(b)
         self.__shelves.append(shelf)
+
 
 
 # For JSON files (for books and authors)
