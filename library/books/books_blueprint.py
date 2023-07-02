@@ -73,55 +73,48 @@ def display_all_books():
 
 @books_blueprint.route('/display_by_shelves', methods=['GET'])
 def display_by_shelves():
-    books_per_page = 8
+    alphabetical_shelves = services.categorize_shelves(repo.repo_instance)
 
-    # Read query parameters.
-    shelf_name = request.args.get('shelf')
-
-    all_shelves = services.get_all_shelves(repo.repo_instance)
-
-    # Retrieve random shelf names to recommend
-    random_20_shelf_names = utilities.get_selected_shelves(20)
-
-    # If shelf_name is None, retrieve the batch of books per shelf in top 5 shelves to display on the Web page.
-    # Else, retrieve batch of books based on shelf_name to display on the Web page.
-    shelves_with_books = []
-    all_view_urls = utilities.get_books_and_urls()
-    if shelf_name is None:
-        top_5_shelves = services.get_top_n_shelves(5, repo.repo_instance)
-        for ts in top_5_shelves:
-            book_ids = ts['shelved_books']
-            shelf_books = [services.get_books_by_id(book_ids, repo.repo_instance)]
-            for sb in shelf_books:
-                sb['view_info_url'] = all_view_urls[sb['book_id']]
-            shelves_with_books += [
-                {
-                    'name': [ts['name']],
-                    'shelved_books': shelf_books
-                }
-            ]
-    else:
-        book_ids = services.get_shelf_data(shelf_name)['shelved_books']
-        shelf_books = [services.get_books_by_id(book_ids, repo.repo_instance)]
-        for sb in shelf_books:
-            sb['view_info_url'] = all_view_urls[sb['book_id']]
-        shelves_with_books += [
-            {
-                'name': shelf_name,
-                'shelved_books': shelf_books
-            }
-        ]
+    for shelves in alphabetical_shelves:
+        for shelf in alphabetical_shelves[shelves]:
+            shelf['shelf_url'] = url_for('books_bp.display_shelf_books', shelf_name=shelf['name'])
 
     # Generate the webpage to display the shelves and books.
     return render_template(
-        'books/books_all.html',
+        'books/books_by_shelves.html',
         title='Our Book Shelves',
-        random_20_shelf_names=random_20_shelf_names,
-        all_shelves=all_shelves,
-        shelves=shelves_with_books,
+        all_categories=alphabetical_shelves.keys(),
+        all_shelves=alphabetical_shelves,
         lg_status=utilities.get_login_status(),
         username=utilities.get_username()
     )
+
+
+@books_blueprint.route('/display_shelf_books', methods=['GET'])
+def display_shelf_books():
+    # Read query parameters.
+    shelf_name = request.args.get('shelf_name')
+
+    # Retrieve shelf from shelf_name.
+    try:
+        shelf = services.get_shelf_data(shelf_name, repo.repo_instance)
+        shelved_books = shelf['shelved_books']
+        books = []
+        for sb in shelved_books:
+            b = services.get_book(sb, repo.repo_instance)
+            b['view_info_url'] = utilities.get_books_and_urls()[b['book_id']]
+            books += [b]
+        # Generate the webpage to display all books under the shelf.
+        return render_template(
+            'books/shelf_list_books.html',
+            title='Shelf',
+            shelf=shelf,
+            books=books,
+            lg_status=utilities.get_login_status(),
+            username=utilities.get_username()
+        )
+    except services.NonExistentShelfException:
+        redirect(url_for('home_bp.home'))
 
 
 @books_blueprint.route('/display_book_info', methods=['GET'])
