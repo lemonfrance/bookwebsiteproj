@@ -123,10 +123,13 @@ def authors_to_dict(authors: Iterable[Author]):
 def book_to_dict(book: Book):
     book_dict = {
         'book_id': book.book_id,
+        'publisher': book.publisher.name,
         'release_year': book.release_year,
         'title': book.title,
         'authors': authors_to_dict(book.authors),
-        'description': book.description
+        'description': book.description,
+        'hyperlink': book.hyperlink,
+        'image_hyperlink': book.image_hyperlink
     }
     return book_dict
 
