@@ -20,8 +20,8 @@ def get_author(author_id: int, repo: AbstractRepository):
 
 
 def get_author_books(author_id: int, repo: AbstractRepository):
-    author = get_author(author_id, repo)
-    books_by_author = repo.get_books_by_author(Author(author_id,author['full_name']))
+    author = repo.get_author_by_id(author_id)
+    books_by_author = repo.get_books_by_author(author)
     return books_to_dict(books_by_author)
 
 
@@ -32,7 +32,7 @@ def get_all_authors(repo: AbstractRepository):
 
 def get_ranked_authors(repo: AbstractRepository):
     authors = repo.get_authors_by_ave_rating()
-    authors=reversed(authors)
+    authors = reversed(authors)
     return authors_to_dict(authors)
 
 
@@ -46,7 +46,7 @@ def search_for_author(search_string: str, repo: AbstractRepository):
         matches_first_name = author_name_list[0].startswith(search_string)
         matches_last_name = author_name_list[-1].startswith(search_string)
         matches_a_book_title = False
-        a_books = get_author_books(a['author_id'])
+        a_books = get_author_books(a['author_id'], repo)
         for book in a_books:
             title = book['title'].split()
             for word in title:
@@ -62,6 +62,46 @@ def search_for_author(search_string: str, repo: AbstractRepository):
             if a not in search_results_fn or a not in search_results_ln:
                 search_results_bk.append(a)
     return search_results_fn+search_results_ln+search_results_bk
+
+
+def get_sorted_authors(repo: AbstractRepository):
+    authors = repo.get_all_authors()
+    author_names = dict()
+
+    # Put Author objects in a dictionary
+    # key = Surname-first name string, value = Author object
+    for a in authors:
+        full_name = a.full_name
+        name_list = full_name.split()
+        if len(name_list) > 1:
+            surname_first = name_list[-1]+', '
+            for n in name_list[:-1]:
+                surname_first += n+' '
+            surname_first = surname_first.strip()
+        else:
+            surname_first = full_name
+        author_names[surname_first] = a
+
+    # a list of surname-first names
+    alphabetical_names = sorted(author_names.keys())
+    # a dictionary of sorted authors
+    sorted_authors = dict()
+    other_list = []
+
+    for name in alphabetical_names:
+        first_char = (name[0]).capitalize()
+        author_obj = author_names[name]
+        author_dict = author_to_dict(author_obj)
+        author_dict['surname_first'] = name
+        if first_char.isalpha():
+            if first_char not in sorted_authors:
+                sorted_authors[first_char] = []
+            sorted_authors[first_char] += [author_dict]
+        else:
+            other_list += [author_dict]
+    if other_list:
+        sorted_authors['Other'] = other_list
+    return sorted_authors
 
 
 # ============================================
