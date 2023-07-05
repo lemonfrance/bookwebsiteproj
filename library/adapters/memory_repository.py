@@ -66,7 +66,7 @@ class MemoryRepository(AbstractRepository):
     def get_books_by_author(self, author: Author) -> List[Book]:
         books_by_author = []
         for book in self.__books:
-            if author.unique_id in book.authors:
+            if author in book.authors:
                 books_by_author += [book]
         return books_by_author
 
