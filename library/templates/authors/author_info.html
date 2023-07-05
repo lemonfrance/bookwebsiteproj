@@ -1,10 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'layout.html' %}
 
-</body>
-</html>
+{% block content %}
+
+<main id="main">
+    <h1>{{title}} </h1>
+    <br>
+    {% if books == [] %}
+        <p>This author has no books available in this site.</p>
+    {% else %}
+        {% for book in books %}
+        <article>
+            <div class="book_preview">
+                <a href="{{book.view_info_url}}" target="_blank">
+                    <img class="book_info_img" src={{book.image_hyperlink}} alt="book cover image">
+                </a>
+                <h3 style="color:white;">{{book.title|truncate(15,False,'...')}}</h3>
+                <sub style="color:white;">
+                {% set names = [] %}
+                {% for a in book.authors %}
+                    {{ names.append(a.full_name) or ''}}
+                {% endfor %}
+                {{ names|join(', ') | truncate(10,True,'...') }}
+                </sub>
+            </div>
+        </article>
+        {% endfor %}
+    {% endif %}
+</main>
+{% endblock %}
