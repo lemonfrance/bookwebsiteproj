@@ -133,6 +133,9 @@ def display_book_info():
         else:
             book['write_review_url'] = url_for('authentication_bp.login')
 
+        for author in book['authors']:
+            author['author_url'] = url_for('authors_bp.display_author_books', author_id=author['author_id'])
+
         # Generate the webpage to display book info.
         return render_template(
             'books/book_info.html',
