@@ -53,11 +53,15 @@
     <br>
 
     <div class="content-compartment">
-        <h3>Seasoned, talented authors to check out!</h3>
+        <h3>Talented authors to check out!</h3>
         <br>
         <ol type="1">
         {%for author in five_top_authors%}
-            <li>{{author.full_name}}</li>
+            <li>
+                <button onclick="location.href='{{author.author_url}}'">
+                {{author.full_name}}
+                </button>
+            </li>
             {% endfor %}
         </ol>
     </div>

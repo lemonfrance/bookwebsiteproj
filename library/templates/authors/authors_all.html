@@ -3,61 +3,20 @@
 {% block content %}
 
 <main id="main">
-    <header>
-        <p>
-        <form>
-            Find Author:
-          <input type="text" id="author" list="all_authors">
-          <datalist id="all_authors">
-              {% for author in all_authors %}
-              <option value={{author.full_name}}>
-              {% endfor %}
-          </datalist>
-            <input type="submit" value="Search">
-        </form>
-        </p>
-        <h2>Our Author Collection</h2>
-    </header>
-
-    {% for author in authors %}
-    <article>
-        <div style="book_preview">
-            <h3 style="color:white;">{{author.full_name}}</h3>
-            <p style="color:white;">
-            {{author.average_rating}}
-            </p>
-        </div>
-    </article>
+    <h1>{{title}}</h1>
+    <br>
+    {% for c in all_categories %}
+        <h2>{{ c }}</h2>
+        <ul>
+        {% for author in all_authors[c] %}
+        <li><a href={{author.author_url}}>
+            {{ author.surname_first }}
+        </a>
+        </li>
+        {% endfor %}
+        </ul>
+    <br>
     {% endfor %}
 
-    <footer>
-        <nav style="clear:both">
-            <div style="float:left">
-                {% if first_au_url is not none %}
-                    <button class="working_btn" onclick="location.href='{{first_au_url}}'">First</button>
-                {% else %}
-                    <button class="disabled_btn" disabled>First</button>
-                {% endif %}
-                {% if prev_au_url is not none %}
-                    <button class="working_btn" onclick="location.href='{{prev_au_url}}'">Previous</button>
-                {% else %}
-                    <button class="disabled_btn" disabled>Previous</button>
-                {% endif %}
-            </div>
-            <div style="float:right">
-                {% if next_au_url is not none %}
-                    <button class="working_btn" onclick="location.href='{{next_au_url}}'">Next</button>
-                {% else %}
-                    <button class="disabled_btn" disabled>Next</button>
-                {% endif %}
-                {% if last_au_url is not none %}
-                    <button class="working_btn"  onclick="location.href='{{last_au_url}}'">Last</button>
-                {% else %}
-                    <button class="disabled_btn" disabled>Last</button>
-                {% endif %}
-            </div>
-        </nav>
-    </footer>
 </main>
-
 {% endblock %}

@@ -18,17 +18,21 @@
         <div style="display:inline-block;position:static;">
         <p>
         <strong style="font-size:150%">{{book.title}}</strong>
-        <br>Written by:
+        <br><strong>Written by
             {% for a in book.authors %}
-                {{a.full_name}}
+                <button onclick="location.href='{{a.author_url}}'">
+                    {{a.full_name}}
+                </button>
             {% endfor %}
-        <br>
+        </strong>
+        <br><strong>
             {% if book.publisher is not none %}
                 Published by {{book.publisher}}
             {% endif %}
             {% if book.release_year is not none %}
                 ({{book.release_year}})
             {% endif %}
+            </strong>
         </p>
 
         <p>{{book.description}}</p>
