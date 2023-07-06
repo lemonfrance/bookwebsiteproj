@@ -163,8 +163,10 @@ def load_book_info(data_path: Path, repo: MemoryRepository):
 def load_author_info(data_path: Path, repo: MemoryRepository):
     author_dataset: List[Author] = read_json_files(data_path, Author)
     for author_object in author_dataset:
-        # Add the Author to the repository.
-        repo.add_author(author_object)
+        # Add the Author to the repository if author has books.
+        books = repo.get_books_by_author(author_object)
+        if books:
+            repo.add_author(author_object)
 
 
 # For CSV files (for users and reviews)
